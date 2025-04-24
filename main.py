@@ -7,7 +7,6 @@ import json
 
 load_dotenv()
 
-
 def get_articles(search_term, date_from=None):
     api_key = os.getenv("GUARDIAN_API_KEY")
     base_url = "https://content.guardianapis.com/search"
@@ -36,7 +35,24 @@ def get_articles(search_term, date_from=None):
             "content_preview": result.get("fields", {}).get("bodyText", "")[:1000]
         }
         articles.append(article)
-    print(articles)
+    return articles
+
+def publish_to_sqs(queue_name, articles):
+    sqs = boto3.client("sqs")
+    queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
+
+    for article in articles:
+        message_body = json.dumps(article)
+        response = sqs.send_message(QueueUrl=queue_url, MessageBody=message_body)
+        print(f"Sent message ID: {response['MessageId']}")
 
 
-get_articles("OpenAI", date_from="2024-04-04")
+if __name__ == "__main__":
+    search_term = "OpenAI"
+    date_from = "2024-04-04"
+    queue_name = "guardian-content"
+    articles = get_articles(search_term, date_from)
+    print(f"Retrieved {len(articles)} articles.")
+    
+    if articles:
+        publish_to_sqs(queue_name, articles)
