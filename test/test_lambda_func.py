@@ -1,4 +1,4 @@
-from src.lambda_func import lambda_handler
+from lambda_func import lambda_handler
 from unittest.mock import patch
 
 
@@ -11,8 +11,8 @@ def test_lambda_handler_success():
 
     mock_articles = [{"webTitle": "AI article", "webUrl": "...", "webPublicationDate": "...", "content_preview": "..."}]
 
-    with patch("src.lambda_func.get_articles", return_value=mock_articles) as mock_get, \
-         patch("src.lambda_func.publish_to_sqs") as mock_publish:
+    with patch("lambda_func.get_articles", return_value=mock_articles) as mock_get, \
+         patch("lambda_func.publish_to_sqs") as mock_publish:
 
         response = lambda_handler(event, context={})
 

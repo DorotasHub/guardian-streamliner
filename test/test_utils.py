@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.utils import get_articles, publish_to_sqs
+from utils import get_articles, publish_to_sqs
 
 @pytest.fixture
 def sample_guardian_response():
@@ -30,7 +30,7 @@ def sample_guardian_response():
     }
 
 def test_get_articles_returns_expected_format(sample_guardian_response):
-    with patch("src.utils.requests.get") as mock_get:
+    with patch("utils.requests.get") as mock_get:
         mock_response = MagicMock()
         mock_response.json.return_value = sample_guardian_response
         mock_response.raise_for_status = MagicMock()
@@ -52,7 +52,7 @@ def test_publish_to_sqs_sends_messages():
     mock_sqs_client.get_queue_url.return_value = {"QueueUrl": "mock-url"}
     mock_sqs_client.send_message.return_value = {"MessageId": "12345"}
 
-    with patch("src.utils.boto3.client", return_value=mock_sqs_client):
+    with patch("utils.boto3.client", return_value=mock_sqs_client):
         publish_to_sqs("mock-queue", [{
             "webTitle": "Mock Article",
             "webPublicationDate": "2024-04-10T12:34:56Z",

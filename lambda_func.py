@@ -1,4 +1,4 @@
-from src.utils import get_articles, publish_to_sqs
+from utils import get_articles, publish_to_sqs
 
 def lambda_handler(event, context):
     search_term = event.get("search_term")
@@ -17,5 +17,5 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": f"{len(articles)} articles sent to SQS."
+        "body": f"{len(articles)} articles sent to SQS"
     }

@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import argparse
-from src.utils import get_articles, publish_to_sqs
+from utils import get_articles, publish_to_sqs
 
 load_dotenv()
 

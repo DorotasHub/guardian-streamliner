@@ -40,8 +40,7 @@ def ensure_queue_exists(queue_name):
         response = sqs.get_queue_url(QueueName=queue_name)
         return response["QueueUrl"]
     except sqs.exceptions.QueueDoesNotExist:
-        response = sqs.create_queue(QueueName=queue_name)
-        return response["QueueUrl"]
+        raise Exception(f"SQS queue '{queue_name}' does not exist.")
 
 
 def publish_to_sqs(queue_name, articles):
