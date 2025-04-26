@@ -1,6 +1,5 @@
 venv
 .env
-**/sandbox.py
 **__pycache__**
 **.pytest_cache**
 .aws-sam

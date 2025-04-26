@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: deploy guardian streamliner lambda func to publish to SQS
+Description: deploy guardian streamliner lambda function for publishing to SQS
 
 Parameters:
   GuardianApiKey:
@@ -13,13 +13,13 @@ Resources:
     Properties:
       QueueName: guardian-content
 
-  GuardianStreamlinerLambdaFunction:
+  GSLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: guardianArticlePublisher
+      FunctionName: articlePublisher
       Runtime: python3.11
-      Handler: lambda_func.lambda_handler
-      CodeUri: .
+      Handler: app.lambda_handler
+      CodeUri: ./src
       Timeout: 30
       Environment:
         Variables:
@@ -30,13 +30,13 @@ Resources:
               Action:
                 - sqs:SendMessage
                 - sqs:GetQueueUrl
-              Resource: !GetAtt GuardianStreamlinerSQSQueue.Arn
+              Resource: !GetAtt GuardianSQSQueue.Arn
 
 Outputs:
   LambdaFunctionArn:
     Description: arn of lambda func
-    Value: !GetAtt GuardianStreamlinerLambdaFunction.Arn
+    Value: !GetAtt GSLambdaFunction.Arn
 
   SQSQueueURL:
     Description: SQS queue url
-    Value: !Ref GuardianStreamlinerSQSQueue
+    Value: !Ref GuardianSQSQueue
