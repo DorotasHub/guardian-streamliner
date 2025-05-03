@@ -77,7 +77,6 @@ def test_get_articles_returns_expected_format(sample_guardian_response):
         assert "content_preview" in articles[0]
         assert len(articles[0]["content_preview"]) <= 1000
         
-        # Verify the request parameters
         mock_get.assert_called_once()
         args, kwargs = mock_get.call_args
         assert kwargs["params"]["q"] == '"test"'
