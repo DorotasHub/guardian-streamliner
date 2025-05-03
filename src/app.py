@@ -34,19 +34,21 @@ def get_articles(search_term, date_from=None):
         
         articles = []
         for article in data["response"]["results"]:
+            title = article.get("webTitle", "")
+            trail_text = article.get("fields", {}).get("trailText", "")
+            body = article.get("fields", {}).get("body", "")
+    
+        # refine search term filtering
+            if not any(re.search(rf"\b{re.escape(search_term)}\b", text, re.IGNORECASE) for text in [title, trail_text, body]):
+                continue
+
             processed_article = {
                 "webPublicationDate": article["webPublicationDate"],
-                "webTitle": article["webTitle"],
-                "webUrl": article["webUrl"]
+                "webTitle": title,
+                "webUrl": article["webUrl"],
+                "summary": trail_text,
+                "content_preview": body[:1000]
             }
-            
-            if "fields" in article and "trailText" in article["fields"]:
-                processed_article["summary"] = article["fields"]["trailText"]
-
-            if "fields" in article and "body" in article["fields"]:
-                content = article["fields"]["body"]
-                processed_article["content_preview"] = content[:1000]
-            
             articles.append(processed_article)
 
         logger.info(f"Retrieved {len(articles)} articles for term '{search_term}'")
