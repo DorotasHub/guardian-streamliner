@@ -4,6 +4,8 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 import logging
+from datetime import datetime
+import re
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -27,8 +29,7 @@ def get_articles(search_term, date_from=None):
         params["from-date"] = date_from
     
     try:
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()
+        response = requests.get(base_url, params=params, timeout=120)
         data = response.json()
         
         articles = []
@@ -88,13 +89,23 @@ def publish_to_sqs(queue_name, articles):
                     message_count += 1
             except Exception as e:
                 logger.error(f"Error sending message to SQS: {e}")
-        
         return message_count
-    
+
     except Exception as e:
         logger.error(f"Error in SQS publishing: {e}")
         return 0
 
+def publish_to_file(articles):
+    timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+    filename = f"output_{timestamp}.json"
+    try:
+        with open(filename, "w") as f:
+            json.dump(articles, f, indent=2)
+        logger.info(f"Wrote {len(articles)} articles to local file: {filename}")
+        return len(articles)
+    except Exception as e:
+        logger.error(f"Error writing to local file: {e}")
+        return 0
 
 def lambda_handler(event, context):
   
@@ -111,12 +122,14 @@ def lambda_handler(event, context):
     articles = get_articles(search_term, date_from)
     
     if not articles:
+        logger.info(f"No articles found")
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'No articles found matching the search criteria'})
+            'body': json.dumps({'message': 'No articles found'})
         }
     
     message_count = publish_to_sqs(queue_name, articles)
+    logger.info(f"Successfully published {len(articles)} articles to SQS queue '{queue_name}'")
     
     return {
         'statusCode': 200,
@@ -128,16 +141,20 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    search_term = input("Enter your search term: ")
+    use_sqs_input = input("Publish to AWS SQS? (y/n): ").lower().strip()
+    search_term = input("Enter your search term: ").strip()
     date_from = input("Enter a start date (YYYY-MM-DD) or leave blank: ").strip() or None
-    queue_name = input("Enter the SQS queue name: ")
+    queue_name = input("Enter the SQS queue name or leave blank for local file: ").strip()
+
+    use_sqs = use_sqs_input in ["y", "yes"]
 
     articles = get_articles(search_term, date_from)
-
     print(f"Retrieved {len(articles)} articles.")
 
     if articles:
-        publish_to_sqs(queue_name, articles)
-        print(f"Successfully published {len(articles)} articles to SQS queue {queue_name}.")
+        if use_sqs:
+            publish_to_sqs(queue_name, articles)
+        else:
+            publish_to_file(articles)
     else:
         print("No articles found to publish.")
