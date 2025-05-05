@@ -1,17 +1,25 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: deploy guardian streamliner lambda function for publishing to SQS
+Description: Deploy guardian streamliner lambda function for publishing to SQS
 
 Parameters:
   GuardianApiKey:
     Type: String
     Description: Guardian API Key
+    NoEcho: true
+  
+  MessageRetentionPeriod:
+    Type: Number
+    Default: 259200  # 3 days in seconds
+    Description: SQS message retention period in seconds (default 3 days per requirements)
 
 Resources:
   GuardianSQSQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: guardian-content
+      QueueName: guardian-content # name of SQS que
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      VisibilityTimeout: 600
 
   GSLambdaFunction:
     Type: AWS::Serverless::Function
@@ -20,7 +28,7 @@ Resources:
       Runtime: python3.11
       Handler: app.lambda_handler
       CodeUri: ./src
-      Timeout: 30
+      Timeout: 60
       Environment:
         Variables:
           GUARDIAN_API_KEY: !Ref GuardianApiKey
