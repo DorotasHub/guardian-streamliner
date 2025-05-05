@@ -3,18 +3,17 @@ VENV := venv
 PYTHON := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 
-.PHONY: help install format test coverage security build deploy run-checks
+.PHONY: help dev-requirements format test coverage security build deploy run-checks
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-install: $(VENV)/bin/activate ## Create virtual environment and install dependencies
+dev-requirements: $(VENV)/bin/activate ## Create virtual environment and install dependencies
 $(VENV)/bin/activate: dev-requirements.txt
 	@test -d $(VENV) || python3 -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install -r dev-requirements.txt
-	touch $(VENV)/bin/activate
 
 format: ## Autoformat code using black
 	$(VENV)/bin/black src/ tests/
