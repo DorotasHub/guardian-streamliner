@@ -33,6 +33,6 @@ run-checks: format test coverage security ## Run all checks in order
 build: ## Build SAM application
 	sam build
 
-deploy: ## Deploy SAM app using deploy.sh
+deploy: build ## Deploy SAM app using deploy.sh
 	chmod +x deploy.sh
 	./deploy.sh
