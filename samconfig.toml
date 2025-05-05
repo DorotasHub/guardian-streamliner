@@ -1,7 +1,12 @@
 version = 0.1
+
 [default.deploy.parameters]
-stack_name = "guardian-sqs-stack"
+stack_name = "guardian-stack"
 resolve_s3 = true
+
+# IMPORTANT: Set this to your preferred AWS region (e.g., us-west-2, eu-central-1, etc.)
+# You can find your default region in ~/.aws/config or run `aws configure get region`
 region = "us-east-1"
+
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
