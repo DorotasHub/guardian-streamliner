@@ -7,8 +7,7 @@ def main():
     use_sqs_input = input("Publish to AWS SQS? (y/n): ").lower().strip()
     search_term = input("Enter your search term: ").strip()
     date_from = (
-        input("Enter a start date (YYYY-MM-DD) or leave blank: ").strip() or None
-    )
+        input("Enter a start date (YYYY-MM-DD) or leave blank: ").strip() or None)
     queue_name = input(
         "Enter the SQS queue name or leave blank for local file: "
     ).strip()

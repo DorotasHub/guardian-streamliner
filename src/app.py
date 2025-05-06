@@ -65,7 +65,8 @@ def get_articles(search_term, date_from=None):
                 "content_preview": body[:1000],
             }
             articles.append(processed_article)
-        logger.info(f"Retrieved {len(articles)} articles for term '{search_term}'")
+        logger.info(
+            f"Retrieved {len(articles)} articles for term '{search_term}'")
         return articles
     except Exception as e:
         logger.error(f"Error fetching articles from Guardian API: {e}")
@@ -156,10 +157,8 @@ def lambda_handler(event, context):
     date_from = event.get("date_from")
     queue_name = event.get("queue_name", "guardian-content")
     if not search_term:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"message": "Missing required field: search_term"}),
-        }
+        return {"statusCode": 400, "body": json.dumps(
+            {"message": "Missing required field: search_term"}), }
     articles = get_articles(search_term, date_from)
     if not articles:
         logger.info("No articles found")
@@ -174,6 +173,5 @@ def lambda_handler(event, context):
             {
                 "message": f"{message_count} articles sent to SQS queue '{queue_name}'",
                 "article_count": message_count,
-            }
-        ),
+            }),
     }
