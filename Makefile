@@ -1,38 +1,36 @@
-.DEFAULT_GOAL := help
-VENV := venv
-PYTHON := $(VENV)/bin/python
-PIP := $(VENV)/bin/pip
+.PHONY: setup test lint security run deploy all-checks
 
-.PHONY: help dev-requirements format test coverage security build deploy run-checks
+# Setup virtual environment and install dependencies
+setup:
+	python -m venv venv
+	. venv/bin/activate && pip install -r dev-requirements.txt
 
-help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+# Run all tests
+test:
+	pytest
 
-dev-requirements: $(VENV)/bin/activate ## Create virtual environment and install dependencies
-$(VENV)/bin/activate: dev-requirements.txt
-	@test -d $(VENV) || python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip
-	$(PIP) install -r dev-requirements.txt
+# Run tests with coverage report
+coverage:
+	coverage run -m pytest tests/
+	coverage report
 
-format: ## Autoformat code using black
-	$(VENV)/bin/black src/ tests/
+# Run code formatting
+lint:
+	black src tests
+	autopep8 --in-place --aggressive --aggressive --recursive src tests
 
-test: ## Run tests with pytest
-	$(VENV)/bin/pytest -v tests
+# Run security check
+security:
+	bandit -r src/
 
-coverage: ## Generate code coverage report
-	$(VENV)/bin/coverage run -m pytest tests/
-	$(VENV)/bin/coverage report
+# Run all checks
+all-checks: lint security test coverage
 
-security: ## Run security checks with bandit
-	$(VENV)/bin/bandit -r src/ -ll
-
-run-checks: format test coverage security ## Run all checks in order
-
-build: ## Build SAM application
-	sam build
-
-deploy: build ## Deploy SAM app using deploy.sh
+# Deploy to AWS
+deploy:
 	chmod +x deploy.sh
 	./deploy.sh
+
+# Run locally
+run:
+	python -m src.cli
