@@ -50,11 +50,10 @@ def get_articles(search_term, date_from=None):
         for article in data["response"]["results"]:
             title = article.get("webTitle", "")
             trail_text = article.get("fields", {}).get("trailText", "")
-            body_text = article.get("fields", {}).get("bodyText", "")
             body = article.get("fields", {}).get("body", "")
             if not any(
                 re.search(rf"\b{re.escape(search_term)}\b", text, re.IGNORECASE)
-                for text in [title, trail_text, body_text]
+                for text in [title, trail_text, body]
             ):
                 continue
             processed_article = {
