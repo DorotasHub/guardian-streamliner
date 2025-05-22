@@ -1,5 +1,7 @@
 from src.app import get_articles, publish_to_file, publish_to_sqs
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def main():
     """Main function to run module as a standalone script for local testing"""
